@@ -1,8 +1,6 @@
-# Praca inżynierska
-
-## Adam Jochna
-Wydział Podstawowych Problemów Techniki
+# Adam Jochna - Praca inżynierska
 **Politechnika Wrocławska**
+Wydział Podstawowych Problemów Techniki 
 ___
 
 **Cel i zakres pracy**:  Celem pracy inżynierskiej jest skonstruowanie modelu pozwalającego przewidzieć położenie pojazdu uczestniczącego w ruchu drogowym. Problem poddany analizie w tej pracy można przedstawić następująco. Mając dane wejściowe, czyli: pozycje granic dróg, kierunki jazdy, jakie obowiązują na drogach, pozycje świateł, kolory świateł, pozycje agentów (piesi, rowerzyści, pojazdy) w ustalonych chwilach [t, t-0.1, ... , t-1.0], trzeba wykorzystać te informacje do przewidzenia pozycji wybranego agenta (niekoniecznie pojazdu, może być np. pieszy) możliwie dokładnie w chwilach [t+0.1, t+0.2, ... , t+5.0].
@@ -28,6 +26,5 @@ ___
  5. Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, Li Fei-Fei, "ImageNet: A large-scale hierarchical image database"
  6. Dan Hendrycks, Kimin Lee, Mantas Mazeika, "Using Pre-Training Can Improve Model Robustness and Uncertainty"
 
-## Zawartoś repozytorium
-
+**Zawartość repozytorium**:
 W katalogu `/latex` znajdują się pliki źródłowe opisowej części pracy.
