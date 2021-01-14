@@ -1,0 +1,43 @@
+\chapter*{Wstęp}
+\addcontentsline{toc}{chapter}{Wstęp}
+
+\thispagestyle{chapterBeginStyle}
+
+\section*{Cel pracy}
+
+Celem pracy inżynierskiej jest skonstruowanie modelu pozwalającego przewidzieć położenie pojazdu uczestniczącego w ruchu drogowym. Formalnie problem ten polega na znalezieniu funkcji $f$, która przekształca dane wejściowe na predykcje. Określenie funkcja $f$ i model predykcyjny jest w kontekście tej pracy tożsame.
+
+\section*{Zakres pracy}
+
+\noindent Zakres pracy obejmuje następujące zagadnienia:
+
+\begin{itemize}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item Opis zbioru dotyczącego ruchu drogowego
+    \item Wybór optymalnego sposobu przetwarzanie zbioru
+    \item Zaproponowanie architektur modeli predykcyjnych i zaprogramowanie ich
+    \item Wytrenowanie kilku sieci neuronowych
+    \item Wybór optymalnego modelu predykcyjnego ruchu agentów
+    \item Porównanie modeli opartych o głębokie sieci neuronowe z prostymi modelami kinetycznymi
+    \item Porównanie metod łączenia wyników wielu modeli predykcyjnych
+\end{itemize}
+
+\section*{Zawartość pracy}
+
+\noindent Rozdziały pracy wraz z opisem zawartości:
+\begin{enumerate}[label*=\arabic*.]
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item \textbf{Analiza problemu} - Opis problemu, klasyfikacja typu problemu, opis struktury zbioru oraz sposobów na wczytywanie jego elementów.
+    \item \textbf{Rasteryzacja sceny} - Opis możliwych sposobów uzyskania informacji na temat scen w formie obrazu. Opis rasteryzatora z biblioteki \texttt{l5kit} oraz rasteryzatora \texttt{CenterLines}. Pokazanie różnic tych rasteryzatorów. Opis algorytmów, jakie są wykorzystywane przez te rasteryzatory.
+    \item \textbf{Funkcja kosztu} - Opis funkcji kosztu, pokazanie jakie są jej składowe oraz wizualizacja wartości tej funkcji dla różnych danych wejściowych.
+    \item \textbf{Naiwna metoda rozwiązania problemu} - Przedstawienie sposobu na przewidywanie ruchu agenta \texttt{EGO} za pomocą prostego modelu wykorzystującego pewne proste założenia na temat ruchu agentów.
+    \item \textbf{Głębokie sieci neuronowe} - Przedstawienie architektury sieci neuronowych pozwalających przewidywać ruch agentów, z użyciem obrazu \texttt{BEV} (widok z góry na scenę).
+    \item \textbf{Proces trenowania sieci neuronowych} - Opis procesu trenowania oraz tego jak efektywnie trenować kilka sieci równolegle. Opis strategii walidacji procesu trenowania.
+    \item \textbf{Agregacja modeli} - Opis sposobów jakimi można połączyć wyniki kilku modeli. Opis tego w jaki sposób takie podejście wpływa na jakość i szybkość predykcji.
+    \item \textbf{Opis ostatecznego rozwiązania} - Opis najlepszego sposobu na uzyskanie predykcji. Opis parametrów sieci oraz analiza przypadków w których sieć popełnia błędy.
+    \item \textbf{Determinizm procesu trenowania} - Opis sposobu uzyskania powtarzalności procesu trenowania.
+\end{enumerate}

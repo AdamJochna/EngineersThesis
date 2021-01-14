@@ -1,0 +1,53 @@
+\chapter{Naiwna metoda rozwiązania problemu}
+\thispagestyle{chapterBeginStyle}
+
+\section{Opis}
+
+Problem predykcji pozycji wyjściowych agenta \texttt{EGO} może być rozważany z odrzuceniem informacji dotyczących otoczenia. Przewidywanie pozycji bez wiedzy na temat obiektów w otoczeniu, pozycji pasów ruchu oraz świateł ignoruje większość użytecznych danych, które mogą zwiększyć skuteczność przewidywania możliwych scenariuszy ruchu agenta \texttt{EGO}. Opisany w tym rozdziale model ma za zadanie przede wszystkim ukazanie jaką wartość funkcji kosztu uzyskuje naiwne podejście, które wykorzystuje tylko wejściowe pozycje oraz wnioskuje pozycje wyjściowe z użyciem pewnych prostych założeń na temat ruchu agenta. Podejście to całkowicie pomija bardzo istotne aspekty ruchu takie jak zatrzymywanie się, przyśpieszanie czy oczekiwanie na zielone światło w celu ruszenia z miejsca.
+
+\section{Model stałej prędkości}
+
+\noindent
+Załóżmy, że pozycje wejściowe agenta \texttt{EGO} są równe:
+
+\begin{equation}
+E_{t} = [(x_{0},y_{0}), (x_{1},y_{1}), ... , (x_{10},y_{10})]
+\end{equation}
+
+\noindent
+Załóżmy, że pozycje wyjściowe agenta \texttt{EGO} są równe:
+
+\begin{equation}
+V_{t} = [(x_{0},y_{0}), (x_{1},y_{1}), ... , (x_{49},y_{49})]
+\end{equation}
+
+\noindent
+Załóżmy, że pozycje wyjściowe agenta \texttt{EGO} spełniają założenia modelu stałej prędkości:
+
+\begin{equation}
+\exists\Delta V_{t}\:\forall i \quad V_{t}[i+1] - V_{t}[i] = \Delta V_{t}
+\end{equation}
+
+\noindent
+Z takimi założeniami wektor pozycji wyjściowych ma postać:
+\begin{equation}
+V_{t} = [V_{t0}, V_{t0} + 1\cdot\Delta V_{t}, ... , V_{t0} + 49\cdot\Delta V_{t}]
+\end{equation}
+
+\noindent
+Pozostaje jeszcze problem oszacowania $V_{t0}$ oraz $\Delta V_{t}$. Można to zrobić używając pozycji wejściowych:
+
+\begin{equation}
+\Delta V_{t} = E_{10} - E_{9}
+\end{equation}
+
+\vspace*{-5mm}
+
+\begin{equation}
+V_{t0} = E_{10} + \Delta V_{t}
+\end{equation}
+
+\vspace*{-5mm}
+
+\section{Wyniki}
+Działanie modelu zostało sprawdzone na zbiorze testowym. Uzyskane trajektorie zostały skopiowane trzy razy dla każdej próbki, dzięki czemu można było zastosować funkcję kosztu $L$. Nie było wymagane trenowanie, gdyż model ten nie posiada parametrów. Uzyskany wynik wynosi $L = 215.56$. Jest to bardzo duża wartość funkcji kosztu, co pozwala stwierdzić, że model ten bardzo źle spełnia zadanie predykcji trajektorii.

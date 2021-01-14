@@ -1,0 +1,91 @@
+\chapter{Agregacja modeli}
+\thispagestyle{chapterBeginStyle}
+
+\section{Opis problemu}
+Predykcja z użyciem jednego modelu jest prosta, model od samego początku jest trenowany pod jedno z góry określone zadanie, w przypadku tej pracy jest to przewidywanie trzech trajektorii z odpowiadającymi prawdopodobieństwami. Problem pojawia się, gdy uzyskuje się kilka niezależnie wytrenowanych modeli predykcyjnych, które posiadają porównywalne skuteczności i nie wiadomo jakimi kryteriami kierować się przy wyborze ostatecznego rozwiązania. W takim scenariuszu najlepsze byłoby użycie pewnej formy głosowania modeli, czyli wykorzystania wiedzy wszystkich dobrze działających modeli do stworzenia jednej predykcji, spójnej z wszystkimi modelami. W przypadku modelowania zmiennej ciągłej (modele regresyjne), można zastosować uśrednianie wyników, w przypadku zmiennych jakościowych (zagadnień klasyfikacyjnych) można zastosować procedurę głosowania, polega ona na wyborze predykcji, która występuje najczęściej. Przy zastosowaniu agregacji modeli można uzyskiwać dokładniejsze i pewniejsze przewidywania. Procedury takie pozwalają również rozwiązać problem naturalnej niestabilności złożonych modeli (poprzez nie wykorzystywanie bezpośrednio predykcji pojedynczych modeli).
+
+\section{Opis użytego rozwiązania}
+Charakterystyka predykcji uzyskiwanych przez modele opisane w tej pracy, nie pozwala na zastosowanie uśredniania. Modele zwracają 3 trajektorie, których kolejność nie jest w żaden sposób wymuszona, dodatkowo dwa różne modele mogą zwracać trajektorie które nie są w żaden sposób powiązane (np. opisują 6 różnych odległych trajektorii o małych prawdopodobieństwach realizacji). Do agregacji predykcji modeli został wykorzystany model mieszaniny Gaussa (ten sam, który został wykorzystany do stworzenia równania funkcji kosztu) zaimplementowany jako algorytm \texttt{GMM\_ensemble}. Algorytm wykorzystuje wszystkie trajektorie uzyskane przez sieci neuronowe i dopasowuje do nich trzy trajektorie. Trajektorie uzyskane z agregacji mają również przypisane prawdopodobieństwa realizacji, dzięki temu mogą być wykorzystane do obliczenia funkcji kosztu i porównania takiego podejścia z naiwnym wyborem pojedynczego najlepszego modelu.
+
+\section{Wyniki na zbiorze testowym}
+Na zbiorze walidacyjnym zostało zbadane, które sieci neuronowe nadają się do użycia w agregacji. Okazało się, że najlepsza agregacja polega na wykorzystaniu trzech sieci wytrenowanych z użyciem rasteryzatora \texttt{SemBoxRasterizer} o architekturach szkieletu (\texttt{ResNet-18}, \texttt{MixNet-L}, \texttt{MixNet-M}). Wykorzystanie pozostałych sieci jest niewskazane, gdyż zawsze pogarsza wynik agregacji. Poniżej zostały wypisane uśrednione wartości funkcji kosztu na zbiorze testowym. Jak widać żadna pojedyncza sieć nie jest lepsza, niż złożenie składające się z trzech sieci.
+
+\begin{itemize}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+    \item 12.01 - \texttt{ResNet-18}
+    \item 11.81 - \texttt{MixNet-L}
+    \item 11.74 - \texttt{MixNet-M}
+    \item 11.05 - \texttt{GMM\_ensemble(ResNet-18, MixNet-M, MixNet-L)}
+\end{itemize}
+
+\newpage
+\section{Pseudokod algorytmu \texttt{GMM\_ensemble}}
+
+\begin{pseudokod}[H]
+    \SetAlgoLined
+    \DontPrintSemicolon
+    \textbf{Dane wejściowe:} $models\_preds$\Comment*[r]{Predykcje k modeli (trajektorie i prawdopodobieństwa)}
+    
+    \BlankLine
+    $models\_ens \leftarrow \lbrack \rbrack$\Comment*[r]{Zagregowane predykcje trajektorii i prawdopodobieństw}
+    $gmm\_sample\_n \leftarrow 1000$\Comment*[r]{Liczba próbek estymujących rozkład trajektorii}
+    
+    \BlankLine
+    \For{$sample\_pred$ $\in$ $models\_preds$}{
+        $mu \leftarrow \lbrack \rbrack$\Comment*[r]{Lista predykcji trajektorii k modeli ($3 \cdot k$ trajektorii)}
+        $p \leftarrow \lbrack \rbrack$\Comment*[r]{Lista predykcji prawdopodobieństw k modeli ($3 \cdot k$ prawdopodobieństw)}
+        
+        \BlankLine
+        \For{$model\_pred$ $\in$ $sample\_pred$}{
+            $mu.append(model\_pred.trajectories)$\Comment*[r]{3 trajektorie dla każdego modelu}
+            $p.append(model\_pred.probabilities)$\Comment*[r]{3 prawdopodobieństwa dla każdego modelu}
+        }
+        
+        \BlankLine
+        $p \leftarrow p / sum(p)$\Comment*[r]{Normalizacja, p reprezentuje prawdopodobieństwa realizacji trajektorii}
+        $x \leftarrow mu.random\_sample(gmm\_sample\_n, p)$\Comment*[r]{Wybieranie 1000 próbek zgodnie z rozkładem p}
+        $x \leftarrow x + random\_normal(\mu=0, \sigma=\epsilon)$\Comment*[r]{Symulowanie próbkowania z mieszaniny rozkładów normalnych}
+        
+        \BlankLine
+        $gm \leftarrow GaussianMixture(n=3).fit(x)$\Comment*[r]{Dopasowanie 3 komponentów do modelu mieszanin Gaussa}
+        
+        \BlankLine
+        $models\_ens.append([gm.means, gm.weights])$\Comment*[r]{Uzyskanie trajektorii i prawdopodobieństw}
+    }
+    
+    \caption{Algorytm GMM\_ensemble}
+\end{pseudokod}
+
+\section{Implementacja algorytmu \texttt{GMM\_ensemble}}
+
+\begin{minted}{python}
+def GMM_ensemble(pos_arr, conf_arr):
+    pos_ens = np.empty(shape=pos_arr.shape[1:])      # agregowane trajektorie
+    conf_ens = np.empty(shape=conf_arr.shape[1:])    # agregowane prawdopodobieństwa
+    gmm_sample_n = 1000                              # liczba próbek mieszaniny
+
+    for idx in range(pos_arr.shape[1]):
+        mu = pos_arr[:, idx, :, :].reshape(-1, 100)  # trajektorie wszystkich modeli
+        p = conf_arr[:, idx, :].reshape(-1)          # prawdopodobieństwa modeli
+        p = p / p.sum()                              # normalizacja do rozkładu p
+
+        mu_idxs = np.random.choice(                  # wybór próbek do mieszaniny
+            mu.shape[0],                             # próbki wybierane z mu
+            size=gmm_sample_n,                       # 1000 próbek z powtórzeniami
+            p=p                                      # wybrane z rozkładem p
+        )
+        x = mu[mu_idxs]                              # x to macierz próbek
+        x += np.random.normal(                       # wprowadzenie błędów dla lepszej
+            loc=0,                                   # zbieżności algorytmu mieszaniny
+            scale=0.01,                              # małe zaburzenie, sigma=1cm
+            size=(gmm_sample_n, 100)                 # 1000 próbek x 50 pozycji xy
+        )
+        gm = sklearn.mixture.GaussianMixture(        # rozwiązanie mieszaniny gaussa
+            n_components=3,                          # 3 komponenty (trajektorie)
+            covariance_type='spherical',             # osobne wariancje dla komponentów
+        ).fit(x)                                     # uruchomienie algorytmu na danych x
+
+        pos_ens[idx, :, :], conf_ens[idx, :] = gm.means_, gm.weights_
+\end{minted}
